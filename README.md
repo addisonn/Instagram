@@ -2,7 +2,7 @@
 
 **Instagram** is a photo sharing app using Parse as its backend.
 
-Time spent: **X** hours spent in total
+Time spent: **24** hours spent in total
 
 ## User Stories
 
@@ -30,12 +30,15 @@ The following **optional** features are implemented:
 - [x] Display the profile photo with each post
 - [x] Tapping on a post's username or profile photo goes to that user's profile page (in timeline)
 - [x] User can comment on a post and see all comments for each post in the post details screen.
-- [ ] User can like a post and see number of likes for each post in the post details screen.
+- [x] User can like a post and see number of likes for each post in the post details screen.
 - [ ] Implement a custom camera view.
 
 The following **additional** features are implemented:
 
 - [ ] List anything else that you can get done to improve the app functionality!
+- [x] User Profiles:
+    Tapping on post pictures goes to that post's detail view
+
 
 Please list two areas of the assignment you'd like to **discuss further with your peers** during the next class (examples include better ways to implement something, how to extend your app in certain ways, etc):
 
@@ -46,20 +49,27 @@ Please list two areas of the assignment you'd like to **discuss further with you
 
 Here's a walkthrough of implemented user stories:
 
-<img src='http://i.imgur.com/link/to/your/gif/file.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+<img src='http://g.recordit.co/XbBzUrBvEC.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
 
-GIF created with [LiceCap](http://www.cockos.com/licecap/).
+GIF created with [RecordIt](https://recordit.co/).
 
 ## Credits
 
 List an 3rd party libraries, icons, graphics, or other assets you used in your app.
 
 - [AFNetworking](https://github.com/AFNetworking/AFNetworking) - networking task library
+- [Bolts](https://github.com/BoltsFramework/Bolts-ObjC) - collection of low-level libraries helpful for database
+- [DateTools](https://github.com/MatthewYork/DateTools) - date formatter helper
+- [MBProgressHUD](https://github.com/matej/MBProgressHUD) - an iOS activity indicator view
+- [Parse](https://cocoapods.org/pods/Parse) - helper for storing backend data
 
 
 ## Notes
 
 Describe any challenges encountered while building the app.
+
+I had a lot of challenges with infinite scroll/reloading the data within the app that deals with synchronization and was hard to debug. Although the UI is not completely smooth still, the logic with fetching more data at the correct time is working now. In addition, it was unclear for me how to best organize data in the database (such as if replies should be a new table or part of post objects) and when to use objects, dictionaries, or simple arrays. 
+
 
 ## License
 
