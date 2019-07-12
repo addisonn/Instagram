@@ -434,6 +434,7 @@
                                         </view>
                                         <connections>
                                             <outlet property="postImageCell" destination="kq7-kz-72A" id="2tO-Ll-R7s"/>
+                                            <segue destination="nRY-Kn-YX8" kind="show" identifier="showPost" id="WjN-Ob-2FD"/>
                                         </connections>
                                     </collectionViewCell>
                                 </cells>
@@ -701,6 +702,7 @@
         <image name="profile_tab" width="25" height="25"/>
     </resources>
     <inferredMetricsTieBreakers>
+        <segue reference="WjN-Ob-2FD"/>
         <segue reference="cRK-yh-YeH"/>
         <segue reference="NmV-6W-Qnj"/>
     </inferredMetricsTieBreakers>

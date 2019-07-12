@@ -10,6 +10,7 @@
 #import "PostCollectionCell.h"
 #import "Post.h"
 #import "Parse/Parse.h"
+#import "PostViewController.h"
 
 
 @interface ProfileViewController ()  <UICollectionViewDataSource, UICollectionViewDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
@@ -156,6 +157,15 @@
         return nil;
     }
     return [PFFileObject fileObjectWithName:@"image.png" data:imageData];
+}
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // pass the tapped post to the detail PostViewController
+        UICollectionViewCell *tappedCell = sender;
+        NSIndexPath *indexPath = [self.collectionView indexPathForCell:tappedCell];
+        Post *tappedPost = self.posts[indexPath.row];
+        PostViewController *postViewController = [segue destinationViewController];
+        postViewController.tappedPost = tappedPost;
 }
 
 @end

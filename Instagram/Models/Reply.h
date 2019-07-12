@@ -11,11 +11,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+// !!! not used model, couldn't be added to Parse because it's not a subclass of PFFIleObject
+// Data organization question: how to best store replies?
+
 @interface Reply : NSObject
 
 // MARK: Properties
-@property (nonatomic, strong) NSString *replyText; // For favoriting, retweeting & replying
-@property (strong, nonatomic) PFUser *user; // Text content of tweet
+@property (nonatomic, strong) NSString *replyText;
+@property (strong, nonatomic) PFUser *user;
 
 
 - (instancetype)initWithText:(NSString *)replyText andUser: (PFUser *)user;

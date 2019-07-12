@@ -55,15 +55,15 @@
     self.tableView.delegate = self;
     self.isMoreDataLoading = NO;
     
+    // query data
     [self fetchTimeline];
-    
     
     // refresh controls
     self.refreshControl = [[UIRefreshControl alloc] init];
     [self.refreshControl addTarget:self action:@selector(fetchTimeline) forControlEvents:UIControlEventValueChanged];
     [self.tableView insertSubview:self.refreshControl atIndex:0];
     
-    // attempt to fix glitch with reload table
+    // attempt to fix glitch with reload table, not successful
 //    self.tableView.rowHeight = UITableViewAutomaticDimension;
 //    self.tableView.estimatedRowHeight = 50;
 //    self.tableView.estimatedSectionHeaderHeight = 0;
@@ -80,14 +80,13 @@
     // fetch data asynchronously
     [query findObjectsInBackgroundWithBlock:^(NSArray *posts, NSError *error) {
         if (posts != nil) {
-            // do something with the array of object returned by the call
-            NSLog(@"successful");
+            NSLog(@"😎😎😎 Successfully loaded pictures for timeline");
             self.posts = [NSMutableArray arrayWithArray:posts];
             [self.tableView reloadData];
             [self.hud hideAnimated:YES];
             
         } else {
-            NSLog(@"%@", error.localizedDescription);
+            NSLog(@"😫😫😫 Error uploading picture: %@", error.localizedDescription);
         }
     }];
     [self.refreshControl endRefreshing];
@@ -97,6 +96,7 @@
     [super viewDidAppear:animated];    
 }
 
+// configure logout button
 - (IBAction)logout:(id)sender {
     AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
     
@@ -106,35 +106,12 @@
     
     [PFUser logOutInBackgroundWithBlock:^(NSError * _Nullable error) {
         // PFUser.current() will now be nil
-        NSLog(@"User logged out successfully");
+        if (error) {
+            NSLog(@"😫😫😫 Error uploading picture: %@", error.localizedDescription);
+        } else {
+            NSLog(@"😎😎😎 Successfully loaded pictures for timeline");
+        }
     }];
-}
-
-
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // pass the tapped post to the detail PostViewController
-    if ([segue.identifier isEqualToString:@"showDeets"]) {
-        UITableViewCell *tappedCell = sender;
-        NSIndexPath *indexPath = [self.tableView indexPathForCell:tappedCell];
-        Post *tappedPost = self.posts[indexPath.row];
-        PostViewController *postViewController = [segue destinationViewController];
-        postViewController.tappedPost = tappedPost;
-        [self.tableView deselectRowAtIndexPath:indexPath animated:NO];
-    }
-    // set up delegate relationship with UploadViewController
-    else if([segue.identifier isEqualToString:@"newPic"]) {
-        UINavigationController *navigationController = [segue destinationViewController];
-        UploadViewController *uploadViewController = (UploadViewController*)navigationController.topViewController;
-        uploadViewController.delegate = self;
-    }
-    // pass the tapped user to the detail PostViewController
-    else if ([segue.identifier isEqualToString:@"profileSegue"]) {
-        ProfileViewController *profileViewController = [segue destinationViewController];
-        profileViewController.user = sender;
-        
-    }
 }
 
 
@@ -163,7 +140,6 @@
     cell.profilePic.layer.masksToBounds = YES;
 
     return cell;
-    
 }
 
 - (NSInteger)tableView:(nonnull UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -182,7 +158,6 @@
     if ([cell respondsToSelector:@selector(setSeparatorInset:)]) {
         [cell setSeparatorInset:UIEdgeInsetsZero];
     }
-    
     if ([cell respondsToSelector:@selector(setLayoutMargins:)]) {
         [cell setLayoutMargins:UIEdgeInsetsZero];
     }
@@ -208,7 +183,6 @@
             [query includeKey:@"author"];
             [query orderByDescending:@"createdAt"];
             
-            
             // fetch data asynchronously
             [query findObjectsInBackgroundWithBlock:^(NSArray *posts, NSError *error) {
                 if (posts != nil && posts.count > 0) {
@@ -216,9 +190,8 @@
                     NSLog(@"successfully loaded more data");
                     [self.posts addObjectsFromArray:posts];
                     [UIView animateWithDuration:0 animations:^{
-                        // attempt to fix glitch
+                        // attempt to fix glitch, not successful
 //                        [self.tableView setContentOffset:self.tableView.contentOffset animated: false]
-                        
                         [self.tableView reloadData];
                     } completion:^(BOOL finished) {
                         self.isMoreDataLoading = false;
@@ -236,6 +209,32 @@
 // perform segue when profile pic/username is tapped 
 - (void)postCell:(nonnull PostCell *)postCell didTap:(nonnull PFUser *)user {
     [self performSegueWithIdentifier:@"profileSegue" sender:user];
+}
+
+
+// preparation before segue
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // pass the tapped post to the detail PostViewController
+    if ([segue.identifier isEqualToString:@"showDeets"]) {
+        UITableViewCell *tappedCell = sender;
+        NSIndexPath *indexPath = [self.tableView indexPathForCell:tappedCell];
+        Post *tappedPost = self.posts[indexPath.row];
+        PostViewController *postViewController = [segue destinationViewController];
+        postViewController.tappedPost = tappedPost;
+        [self.tableView deselectRowAtIndexPath:indexPath animated:NO];
+    }
+    // set up delegate relationship with UploadViewController
+    else if([segue.identifier isEqualToString:@"newPic"]) {
+        UINavigationController *navigationController = [segue destinationViewController];
+        UploadViewController *uploadViewController = (UploadViewController*)navigationController.topViewController;
+        uploadViewController.delegate = self;
+    }
+    // pass the tapped user to the detail PostViewController
+    else if ([segue.identifier isEqualToString:@"profileSegue"]) {
+        ProfileViewController *profileViewController = [segue destinationViewController];
+        profileViewController.user = sender;
+        
+    }
 }
 
 

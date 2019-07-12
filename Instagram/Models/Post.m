@@ -24,6 +24,7 @@
     return @"Post";
 }
 
+// return the new post after saving in database
 + (instancetype) postUserImage: ( UIImage * _Nullable )image withCaption: ( NSString * _Nullable )caption withCompletion: (PFBooleanResultBlock  _Nullable)completion {
     
     Post *newPost = [Post new];
@@ -38,6 +39,7 @@
     return newPost;
 }
 
+// helper function for saving image
 + (PFFileObject *)getPFFileFromImage: (UIImage * _Nullable)image {
 
     // check if image is not nil

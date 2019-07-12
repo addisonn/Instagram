@@ -17,12 +17,10 @@
 @property (weak, nonatomic) IBOutlet UIImageView *picView;
 @property (weak, nonatomic) IBOutlet UITextField *replyText;
 @property (weak, nonatomic) IBOutlet UITableView *replyTable;
-@property (strong, nonatomic) NSArray *replies;
+@property (strong, nonatomic) NSMutableArray *replies;
 @property (weak, nonatomic) IBOutlet UIImageView *profilePic;
 @property (weak, nonatomic) IBOutlet UILabel *likeCount;
 @property (weak, nonatomic) IBOutlet UIButton *likeButton;
-
-
 
 @end
 
@@ -31,12 +29,15 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    NSLog(@"%@", self.tappedPost[@"replies"]);
-    
     // Do any additional setup after loading the view.
     self.username.text = self.tappedPost.author.username;
     self.caption.text = self.tappedPost.caption;
     self.likeCount.text = [NSString stringWithFormat:@"%@", self.tappedPost[@"likeCount"]];
+    
+    if([self.tappedPost[@"likedUsers"] containsObject:PFUser.currentUser.objectId]) {
+        UIImage *unlikeImage = [UIImage imageNamed:@"favor-icon-red"];
+        [self.likeButton setImage:unlikeImage forState:UIControlStateNormal];
+    }
     
     // Format createdAt date string
     NSDate *createdAt = self.tappedPost.createdAt;
@@ -99,6 +100,8 @@
         if (succeeded) {
             NSLog(@"The message was saved!");
             self.replyText.text = @"";
+            [self.replies insertObject:reply atIndex:0];
+            [self.replyTable reloadData];
         } else {
             NSLog(@"Problem saving message: %@", error.localizedDescription);
         }
@@ -150,7 +153,7 @@
         if (replies != nil) {
             // do something with the array of object returned by the call
             NSLog(@"successful");
-            self.replies = replies;
+            self.replies = [NSMutableArray arrayWithArray: replies];
             [self.replyTable reloadData];
             
         } else {
@@ -162,9 +165,6 @@
 - (nonnull UITableViewCell *)tableView:(nonnull UITableView *)tableView cellForRowAtIndexPath:(nonnull NSIndexPath *)indexPath {
     ReplyCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ReplyCell" forIndexPath:indexPath];
     PFObject *reply = self.replies[indexPath.row];
-    
-    //    // for profile segue delegate (click to see profile)
-    //    cell.delegate = self;
     
     // set up components in the cell
     NSString *username = (reply[@"user"])[@"username"];
@@ -180,47 +180,38 @@
 }
 
 - (IBAction)likePost:(id)sender {
-    
+    // if the post has never been liked, create a new likedUser array
     if (self.tappedPost[@"likedUsers"] == nil) {
         self.tappedPost[@"likedUsers"] = [NSMutableArray new];
     }
     
-    NSMutableArray *likedUsers = self.tappedPost[@"likedUser"];
-
-    if(likedUsers && [likedUsers containsObject:PFUser.currentUser]) {
-        [likedUsers removeObject:PFUser.currentUser];
+    // check if the user has already liked the array and update accordingly
+    if([self.tappedPost[@"likedUsers"] containsObject:PFUser.currentUser.objectId]) {
+        [self.tappedPost removeObject:PFUser.currentUser.objectId forKey:@"likedUsers"];
         UIImage *unlikeImage = [UIImage imageNamed:@"favor-icon"];
         [self.likeButton setImage:unlikeImage forState:UIControlStateNormal];
-        
+        NSNumber *newLikeCount = [NSNumber numberWithInteger:[self.tappedPost[@"likeCount"] intValue] - 1];
+        self.tappedPost[@"likeCount"] = newLikeCount;
+        self.likeCount.text = [NSString stringWithFormat:@"%@", newLikeCount];
     } else {
-        [likedUsers addObject:PFUser.currentUser];
+        [self.tappedPost addObject:PFUser.currentUser.objectId forKey:@"likedUsers"];
         UIImage *likeImage = [UIImage imageNamed:@"favor-icon-red"];
         [self.likeButton setImage:likeImage forState:UIControlStateNormal];
-//        NSInteger *likeCount = self.tappedPost[@"likedUser"];
-//        self.tappedPost[@"likedUser"] = likeCount + 1;
+        NSNumber *newLikeCount = [NSNumber numberWithInteger:[self.tappedPost[@"likeCount"] intValue] + 1];
+        self.tappedPost[@"likeCount"] = newLikeCount;
+        self.likeCount.text = [NSString stringWithFormat:@"%@", newLikeCount];
         
     }
     
+    // save data in background
     [self.tappedPost saveInBackgroundWithBlock:^(BOOL succeeded, NSError * _Nullable error) {
                 if(succeeded) {
-                    NSLog(@"😎😎😎 Successfully added reply");
+                    NSLog(@"😎😎😎 Successfully liked/unliked post");
                 } else {
-                    NSLog(@"😫😫😫 Error adding reply: %@", error.localizedDescription);
+                    NSLog(@"😫😫😫 Error liking post: %@", error.localizedDescription);
                 }
-        
     }];
     
 }
-
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 @end
